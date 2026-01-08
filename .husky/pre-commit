@@ -1,0 +1,10 @@
+npm run lint
+npm run build
+npm run test
+
+VERSION=$(jq -r .version package.json)
+NEW_VERSION=$(echo $VERSION | awk -F. -v OFS=. '{$3 += 1; print}')
+jq ".version = \"$NEW_VERSION\"" package.json > temp.json && mv temp.json package.json
+echo "Version updated to $NEW_VERSION"
+
+git add package.json

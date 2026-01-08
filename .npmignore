@@ -1,0 +1,12 @@
+node_modules
+build/__tests__
+.husky
+.eslint*
+.git
+.env
+yarn.lock
+package-lock.json
+src/__tests__
+*.test.ts
+tsconfig.eslint.json
+.vscode
