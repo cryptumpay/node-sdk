@@ -21,7 +21,7 @@ export class CryptumPayClient {
       throw new Error('CryptumPayClient requires a valid signer');
     }
 
-    baseUrl = baseUrl || 'https://project-api.cryptumpay.com';
+    baseUrl = baseUrl || 'https://papi.cryptumpay.com';
 
     this.#baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
     this.#signer = signer;

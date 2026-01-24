@@ -1,6 +1,6 @@
 {
   "name": "@cryptumpay/node-sdk",
-  "version": "2.0.38",
+  "version": "2.0.39",
   "description": "Official Node.js SDK for CryptumPay API with built-in request signing and TypeScript support",
   "main": "build/index.js",
   "types": "build/index.d.ts",
