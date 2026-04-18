@@ -201,6 +201,7 @@ const response = await client.getOrder(orderId);
 | `UNDER_REVIEW` | 1 | Payment under review |
 | `CANCELED` | 2 | Order canceled or expired |
 | `PAID` | 3 | Payment successfully completed |
+| `CREDITING` | 4 | Order is being credited to the merchant |
 
 - Order is considered paid **only when status is `PAID`**
 - One order = one payment
