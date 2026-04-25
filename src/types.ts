@@ -33,6 +33,27 @@ export type TCreateOrderRequest = {
   url?: string;
 };
 
+export type TWithdrawRequest = {
+  currency: string;
+  blockchain: string;
+  address: string;
+  extra?: string | null;
+  amount: string;
+};
+
+export type TWithdrawResponse = {
+  id: string;
+};
+
+export type TGetWithdrawalRequest = {
+  id: string;
+};
+
+export type TGetWithdrawalResponse = {
+  status: string;
+  hash?: string;
+};
+
 export type TSuccessResponse<T> = {
   data: T;
   errorObject: null;

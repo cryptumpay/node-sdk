@@ -220,6 +220,60 @@ Webhooks are optional and configured in the merchant console.
 
 ---
 
+## Withdrawals
+
+### Initiating a Withdrawal
+
+```ts
+const response = await client.withdraw({
+  currency: 'usdt',
+  blockchain: 'tron',
+  address: 'TYourWalletAddressHere',
+  amount: '100'
+});
+
+if (response.errorObject) {
+  console.error(response.errorObject);
+} else {
+  console.log('Withdrawal ID:', response.data.id);
+}
+```
+
+#### Withdrawal parameters
+
+| Field | Required | Description |
+|-------|---------|-------------|
+| `currency` | ✅ | Always `usdt` |
+| `blockchain` | ✅ | `bsc` by default. To enable other networks, contact support |
+| `address` | ✅ | Recipient wallet address |
+| `amount` | ✅ | Amount to withdraw as a string |
+
+Returns `{ id: string }` — the withdrawal ID used to track its status.
+
+---
+
+### Checking Withdrawal Status
+
+```ts
+const response = await client.getWithdrawal({ id: 'withdrawal-id' });
+
+if (response.errorObject) {
+  console.error(response.errorObject);
+} else {
+  console.log('Status:', response.data.status);
+  console.log('TX Hash:', response.data.hash);
+}
+```
+
+Returns:
+
+| Field | Description |
+|-------|-------------|
+| `status` | Current withdrawal status |
+| `hash` | Blockchain transaction hash (available once processed) |
+
+---
+
 ## Error Handling
 
 - `httpCode` always matches HTTP status
@@ -251,6 +305,8 @@ CRYPTUMPAY_API_SECRET=your_api_secret
 |--------|-------------|
 | `createOrder(params)` | Create a new order |
 | `getOrder(orderId)` | Retrieve order details |
+| `withdraw(params)` | Initiate a crypto withdrawal |
+| `getWithdrawal(params)` | Retrieve withdrawal status |
 
 ---
 
