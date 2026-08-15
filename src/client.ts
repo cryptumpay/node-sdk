@@ -1,5 +1,4 @@
 import axios, { AxiosInstance } from 'axios';
-import { Agent } from 'https';
 import {
   ISigner,
   TContent,
@@ -30,11 +29,7 @@ export class CryptumPayClient {
     this.#baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
     this.#signer = signer;
 
-    this.#axios = axios.create({
-      httpsAgent: new Agent({
-        rejectUnauthorized: false,
-      }),
-    });
+    this.#axios = axios.create();
   }
 
   private async makeRequest<T> (path: string, method: TMethod, params?: TContent): Promise<TResponse<T>> {
