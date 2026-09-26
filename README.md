@@ -5,7 +5,7 @@
 [![license](https://img.shields.io/npm/l/@cryptumpay/node-sdk.svg)](https://github.com/cryptumpay/node-sdk/blob/main/LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 
-Official Node.js SDK for CryptumPay API with built-in request signing and full TypeScript support.
+Official Node.js SDK for [CryptumPay](https://www.cryptumpay.com) API with built-in request signing and full TypeScript support.
 
 ---
 
