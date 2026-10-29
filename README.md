@@ -138,15 +138,42 @@ const response = await client.createOrder({
 |------|---------|-------------|
 | `title` | ✅ | Short order title |
 | `description` | ✅ | Order description |
-| `fiatAmount` | ✅ | Amount in fiat currency |
-| `fiatCurrency` | ✅ | Fiat currency (`USD`, `EUR`, case-insensitive) |
+| `fiatAmount` | One of two price bases | Amount in fiat currency. Mutually exclusive with `cryptoAmount` — see [Pricing in Crypto](#pricing-in-crypto-white-label--native-apps) below |
+| `fiatCurrency` | With `fiatAmount` | Fiat currency (`USD`, `EUR`, case-insensitive) |
+| `cryptoCurrency` | One of two price bases | Crypto ticker (`USDT`, etc). Used together with `cryptoBlockchain` + `cryptoAmount` instead of `fiatAmount`/`fiatCurrency` |
+| `cryptoBlockchain` | With `cryptoCurrency` | Network name (`tron`, `bsc`, ...) |
+| `cryptoAmount` | With `cryptoCurrency` | Order price denominated in crypto |
+| `clientEmail` | ❌ | Your end customer's email, attached to the resulting deposit |
 | `projectDataOrderId` | ❌ | Merchant internal order ID |
-| `projectDataUserEmail` | ❌ | Customer email |
+| `projectDataUserEmail` | ❌ | Customer email (metadata only) |
 | `projectDataUserId` | ❌ | Customer ID |
 | `projectDataMeta` | ❌ | Custom metadata |
 | `url` | ❌ | Redirect URL after payment |
 
-> 💡 Only the first four fields affect the payment amount.
+> 💡 Use either `fiatAmount`+`fiatCurrency` or `cryptoCurrency`+`cryptoBlockchain`+`cryptoAmount`, never both.
+
+---
+
+## Pricing in Crypto (White-Label / Native Apps)
+
+If your integration has no widget (e.g. a mobile app) and you build your own network picker, price the order directly in crypto instead of fiat. This creates the merchant order **and** attaches a customer order (deposit address, exact amount) in the same call — no second request needed.
+
+```ts
+const { data: currencies } = await client.getCurrencies();
+// [{ cryptoCurrency: 'usdt', cryptoBlockchain: 'tron', cryptoMinAmount: '5', cryptoMaxAmount: '49999', transferFee: '1.1' }, ...]
+
+const response = await client.createOrder({
+  title: 'Order #12345',
+  description: 'Payment for order',
+  cryptoCurrency: 'usdt',
+  cryptoBlockchain: 'tron',
+  cryptoAmount: '50.00',
+});
+
+const { depositAddress, cryptoAmount } = response.data.customerOrder;
+```
+
+`getCurrencies()` returns the networks currently available, with limits and fees already adjusted for your project — no rate lookups needed on your side. Full details: https://docs.cryptumpay.com/guide/use-cases#white-label-native-app
 
 ---
 
@@ -303,8 +330,9 @@ CRYPTUMPAY_API_SECRET=your_api_secret
 
 | Method | Description |
 |--------|-------------|
-| `createOrder(params)` | Create a new order |
+| `createOrder(params)` | Create a new order (fiat- or crypto-priced) |
 | `getOrder(orderId)` | Retrieve order details |
+| `getCurrencies()` | List cryptocurrencies/networks available for payment, with limits and fees |
 | `withdraw(params)` | Initiate a crypto withdrawal |
 | `getWithdrawal(params)` | Retrieve withdrawal status |
 
