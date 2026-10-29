@@ -12,6 +12,7 @@ import {
   TWithdrawResponse,
   TGetWithdrawalRequest,
   TGetWithdrawalResponse,
+  TGetCurrenciesResponse,
 } from './types';
 
 export class CryptumPayClient {
@@ -95,6 +96,10 @@ export class CryptumPayClient {
 
   public async getOrder (orderId: string): Promise<TResponse<TGetOrderResponse>> {
     return await this.makeRequest<TGetOrderResponse>(`/v1/orders/${orderId}`, 'GET');
+  }
+
+  public async getCurrencies (): Promise<TResponse<TGetCurrenciesResponse>> {
+    return await this.makeRequest<TGetCurrenciesResponse>('/v1/currencies', 'GET');
   }
 
   public async withdraw (params: TWithdrawRequest): Promise<TResponse<TWithdrawResponse>> {

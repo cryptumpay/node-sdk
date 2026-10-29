@@ -24,14 +24,41 @@ export interface ISigner {
 export type TCreateOrderRequest = {
   title: string;
   description: string;
-  fiatAmount: string;
-  fiatCurrency: string;
+  fiatAmount?: string;
+  fiatCurrency?: string;
+  cryptoCurrency?: string;
+  cryptoBlockchain?: string;
+  cryptoAmount?: string;
+  clientEmail?: string;
   projectDataMeta?: string;
   projectDataOrderId?: string;
   projectDataUserEmail?: string;
   projectDataUserId?: string;
   url?: string;
 };
+
+export type TCustomerOrderInfo = {
+  id: string;
+  status: string;
+  cryptoTicker: string;
+  cryptoBlockchainId: number;
+  cryptoAmount: string;
+  depositAddress?: string;
+  expiresAt?: number;
+  depositsList: Record<string, any>[];
+  summary: Record<string, any>;
+};
+
+export type TCurrencyEntry = {
+  cryptoCurrency: string;
+  cryptoBlockchain: string;
+  cryptoMinAmount: string;
+  cryptoMaxAmount: string;
+  transferFee?: string;
+  serviceFeePercent?: string;
+};
+
+export type TGetCurrenciesResponse = TCurrencyEntry[];
 
 export type TWithdrawRequest = {
   currency: string;
@@ -89,6 +116,7 @@ export type TCreateOrderResponse = {
     url: string;
     projectData: Record<string, any>;
   };
+  customerOrder?: TCustomerOrderInfo | null;
 };
 
 export type TGetOrderResponse = {
@@ -110,6 +138,7 @@ export type TGetOrderResponse = {
     projectData: Record<string, any>;
   };
   hasCustomerOrder: boolean;
+  customerOrder?: TCustomerOrderInfo | null;
   financeSummary?: {
     status: number;
     accrued: boolean;
