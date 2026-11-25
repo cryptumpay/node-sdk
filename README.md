@@ -15,7 +15,7 @@ Official Node.js SDK for [CryptumPay](https://www.cryptumpay.com) API with built
 - You create an order on your backend
 - CryptumPay returns **CryptumPay Order ID** (`response.data.id`)
 - This ID is used by the widget or payment links
-- Payment is considered successful **only when order status is `PAID`**
+- Payment is considered successful **only when `customerOrder.status` is `paid`** — not `settled`
 
 ---
 
@@ -101,7 +101,7 @@ Embedded modal payment interface displayed on top of your website.
 5. Backend returns **CryptumPay Order ID**
 6. Widget displays payment modal
 7. User completes payment
-8. Order status becomes `PAID`
+8. `customerOrder.status` becomes `paid` — fulfill the order now, don't wait for `settled`
 9. Widget triggers `onFinishOrder`
 
 ---
@@ -222,28 +222,35 @@ const response = await client.getOrder(orderId);
 
 ## Order Lifecycle and Statuses
 
-| Status | Code | Description |
-|------|------|-------------|
-| `IN_PROGRESS` | 0 | Order created, waiting for user action |
-| `UNDER_REVIEW` | 1 | Payment under review |
-| `CANCELED` | 2 | Order canceled or expired |
-| `PAID` | 3 | Payment successfully completed |
-| `CREDITING` | 4 | Order is being credited to the merchant |
+`response.data.customerOrder.status` goes through the following values:
 
-- Order is considered paid **only when status is `PAID`**
-- One order = one payment
-- Payment addresses are single-use
+| Status | Description |
+|------|-------------|
+| `created` | Deposit address assigned, awaiting an incoming payment |
+| `processing` | An incoming transaction was detected on-chain, awaiting confirmations |
+| `review` | Uncommon — held for manual review because AML screening flagged the deposit |
+| `canceled` | Order was canceled before any payment arrived |
+| `paid` | **Deliver the goods/service now.** The customer has paid in full; this is final |
+| `settled` | Informational only — received crypto has been converted and credited to your project balance. Can arrive a while after `paid` |
+
+> ⚠️ **Fulfill the order on `paid`, not `settled`.** `paid` always fires first and is the final payment outcome — `settled` is just balance accounting that can lag behind it by a noticeable amount. Waiting for `settled` is what causes customers to see a successful payment with no order delivered yet.
+
+- The deposit address is single-use per order, but not per transaction — an order can receive more than one deposit (e.g. the customer underpaid and sent a second transaction, paid from two wallets, or retried after a stuck transaction). Full details on handling partial payments and overpayments: https://docs.cryptumpay.com/guide/api-endpoints.html#deposits-customerorder-depositslist
 - Orders expire at `expiresAt`
+- `financeSummary.status` is a deprecated numeric field kept only for backward compatibility — use `customerOrder.status` above instead
+
+See [customerOrder Statuses](https://docs.cryptumpay.com/guide/api-endpoints#customerorder-statuses) for full details.
 
 ---
 
 ## Payment Confirmation
 
-You may:
-- Poll order status using `getOrder`
-- Receive webhook notifications
+Never rely on the widget's `onFinishOrder` callback or a redirect alone to confirm a payment — always verify the final status server-side:
 
-Webhooks are optional and configured in the merchant console.
+- Poll order status using `getOrder` and check `response.data.customerOrder.status`
+- Receive webhook notifications (optional, configured in the merchant console) — see https://docs.cryptumpay.com/guide/api-webhooks
+
+Either way, fulfill the order as soon as you see `paid` — don't wait for `settled`.
 
 ---
 
@@ -270,10 +277,13 @@ if (response.errorObject) {
 
 | Field | Required | Description |
 |-------|---------|-------------|
-| `currency` | ✅ | Always `usdt` |
-| `blockchain` | ✅ | `bsc` by default. To enable other networks, contact support |
+| `currency` | ✅ | Cryptocurrency ticker, e.g. `usdt` |
+| `blockchain` | ✅ | Blockchain identifier, e.g. `bsc`, `tron` |
 | `address` | ✅ | Recipient wallet address |
-| `amount` | ✅ | Amount to withdraw as a string |
+| `amount` | ✅ | Amount to withdraw as a decimal string |
+| `extra` | ❌ | Memo/tag for blockchains that require it (e.g. XRP, TON) |
+
+> ⚠️ Withdrawal endpoints require an IP whitelist configured for your API key in the merchant console, otherwise requests are rejected.
 
 Returns `{ id: string }` — the withdrawal ID used to track its status.
 
@@ -296,14 +306,24 @@ Returns:
 
 | Field | Description |
 |-------|-------------|
-| `status` | Current withdrawal status |
-| `hash` | Blockchain transaction hash (available once processed) |
+| `status` | Current withdrawal status — see table below |
+| `hash` | Blockchain transaction hash (available once broadcast) |
+
+#### Withdrawal statuses
+
+| Status | Description |
+|--------|-------------|
+| `created` | Withdrawal queued, not yet processed |
+| `pending` | Transaction submitted to the blockchain |
+| `finished` | Transaction confirmed on-chain |
+| `failed` | Withdrawal could not be completed |
 
 ---
 
 ## Error Handling
 
 - `httpCode` always matches HTTP status
+- `errorObject` also includes an `appCode` and, optionally, `message` and `data`
 - Partial success states do not exist
 - Requests can be safely retried
 
@@ -313,7 +333,7 @@ if (response.errorObject) {
 }
 ```
 
-Full error list is available in the documentation.
+Full error reference: https://docs.cryptumpay.com/guide/api-authentication#error-reference
 
 ---
 
