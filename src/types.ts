@@ -37,6 +37,18 @@ export type TCreateOrderRequest = {
   url?: string;
 };
 
+export type TCustomerOrderDeposit = {
+  id: string;
+  confirmations: number;
+  amount: string;
+  isVerified: boolean;
+  isSuspended: boolean;
+  expectedAmount: string;
+  remainingAmount: string;
+  overpaidAmount: string;
+  canPayRemaining: boolean;
+};
+
 export type TCustomerOrderInfo = {
   id: string;
   status: string;
@@ -45,7 +57,7 @@ export type TCustomerOrderInfo = {
   cryptoAmount: string;
   depositAddress?: string;
   expiresAt?: number;
-  depositsList: Record<string, any>[];
+  depositsList: TCustomerOrderDeposit[];
   summary: Record<string, any>;
 };
 
